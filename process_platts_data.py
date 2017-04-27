@@ -1,6 +1,15 @@
 import re
 import codecs
 
+
+"""
+
+    This method processes the platts dictionary obtained from University of Chicago
+    The dictionary obtained by us was written in xml format and had synonyms, multiple transaltoin
+    for each word. So, this library helps us process the platts dictionary and write the
+    processed words in the dictionary. 
+       
+"""
 def process_platt_dictionary():
     file = codecs.open("data/platts_dict/platts.txt", encoding='utf-8')
     processed_output_file = codecs.open("data/platts_dict/platts_h_u_a.txt","w", encoding='utf-8')
@@ -21,7 +30,35 @@ def process_platt_dictionary():
                 processed_output_file.write("\n")
                 count += 1
         print count
+        
+"""
+
+    This utility returns a comprehensive list of hindi words from platts parallel 
+    corpus
     
+"""        
+def process_platt_dictionary_for_hindi_words():
+    file = codecs.open("data/platts_dict/platts.txt", encoding='utf-8')
+    count = 0
+    print "Starting processing... "
+    with codecs.open("data/platts_dict/platts_hindi_dictionary.txt", "w", "utf-8-sig") as output_file:
+        for line in file:
+            result = re.findall('<d>(.*?)</d>', line)
+            if result != None:
+                for i in result:
+                    output_file.write(i)
+                    output_file.write("\n")
+                count += 1
+        print count
+
+
+
+"""
+
+    This utility gives a string with Hindi, Urdu, Roman version of a word.
+    
+""" 
+  
 def process_hinidi_urdu_words(line):
     result_urdu = re.search('<pa>(.*?)</pa>', line)
     result_hindi = re.search('<d>(.*?)</d>', line)
@@ -40,6 +77,14 @@ def process_hinidi_urdu_words(line):
         updated_string += "R:" + result_i.group(1)    
     return updated_string
 
+
+"""
+
+    This utility returns a parallel corpus of hindi and urdu words : 
+    retrieved after processing xml corpus 
+    
+""" 
+
 def process_hinidi_urdu_words_dataset(line, processed_hindi_output_file, processed_urdu_output_file):
     result_urdu = re.search('<pa>(.*?)</pa>', line)
     result_hindi = re.search('<d>(.*?)</d>', line)
@@ -53,8 +98,15 @@ def process_hinidi_urdu_words_dataset(line, processed_hindi_output_file, process
             processed_hindi_output_file.write("\n")
             processed_urdu_output_file.write(result_urdu.group(1))
             processed_urdu_output_file.write("\n")
+
             
 
+"""
+
+    This utility returns a parallel corpus of hindi and urdu words : 
+    retrieved after processing xml corpus 
+    
+""" 
 def modify_hinidi_urdu_words_dataset(line, processed_hindi_output_file, processed_urdu_output_file):
     result_urdu = re.search('<pa>(.*?)</pa>', line)
     result_hindi = re.search('<d>(.*?)</d>', line)
@@ -124,4 +176,11 @@ def find_location(s, y):
     return s
         
         
+def find_empty_line():
+    file = codecs.open("data/platts_dict/platts_hindi_updated.txt", encoding='utf-8')
+    for line in file:
+        if len(line.strip()) <1:
+            print "empty line found"
+            
+#process_platt_dictionary_for_hindi_words()        
 process_platt_dictionary()
