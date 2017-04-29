@@ -65,7 +65,6 @@ def matchWordsBasedOnIPA(urdu_ipa_list, hindi_ipa_list):
 def covertUrduWordsinIPA(urdu_words):
 	#using the global urdu ipa dictionary
 	global urdu_ipa_dict
-	#print urdu_words
 	
 	#this will store the ipa conversions of urdu words
 	urdu_ipa_list = []
@@ -78,35 +77,23 @@ def covertUrduWordsinIPA(urdu_words):
 			#looping over alphabet by alphabet
 			i = 0
 			for alphabet in list(word):
-				#print alphabet
 				a1 = alphabet
-				#a2 = u'\u0670'
-				#print a1,a2
-				#if a1.encode('UTF-8') == a2.encode('UTF-8'):
-				#	print word
 				if a1.encode('UTF-8') == madd.encode('UTF-8'):
-					#print word
-					#print a1
-					ipa_word += urdu_ipa_dict[list(word)[i-1]][0]
-					#print word
-					#print 'Repeated the sound of the alphabet' + list(word)[i-1]					
+					ipa_word += urdu_ipa_dict[list(word)[i-1]][0]				
 					i += 1
 					continue
 				#this means that we have not entered the alphabet in the dictionary
 				if alphabet not in urdu_ipa_dict:
-					#print 'The alphabet ' + alphabet + ' is not present in the dictionary'
 					i += 1 
 					continue
 				#this means that we have not put in the mapping yet
 				if len(urdu_ipa_dict[alphabet]) == 0:
 					i += 1
-					#print 'There is no mapping for the alphabet ' + alphabet + ' in the dictionary'
 					continue
 				else:
 					ipa_word += urdu_ipa_dict[alphabet][0]
 					i += 1
 			
-			#print ipa_word
 			urdu_ipa_list.append(ipa_word)
 
 	return urdu_ipa_list
@@ -116,9 +103,7 @@ def covertUrduWordsinIPA(urdu_words):
 #output is list of ipa representation of these hindi words 
 def covertHindiWordsinIPA(hindi_words):
 	#using the global hindi ipa dictionary
-	global hindi_ipa_dict
-	#print hindi_words
-	
+	global hindi_ipa_dict	
 	#this will store the ipa conversions of hindi words
 	hindi_ipa_list = []
 	#looping over word by word
@@ -129,16 +114,13 @@ def covertHindiWordsinIPA(hindi_words):
 			for alphabet in list(word):
 				#this means that we have not entered the alphabet in the dictionary
 				if alphabet not in hindi_ipa_dict:
-					#print 'The alphabet ' + alphabet + ' is not present in the dictionary' 
 					continue
 				#this means that we have not put in the mapping yet
 				if len(hindi_ipa_dict[alphabet]) == 0:
-					#print 'There is no mapping for the alphabet ' + alphabet + ' in the dictionary'
 					continue
 				else:
 					ipa_word += hindi_ipa_dict[alphabet][0]
 			
-			#print ipa_word
 			hindi_ipa_list.append(ipa_word)
 
 	return hindi_ipa_list
@@ -348,41 +330,20 @@ def main():
 	output_file = codecs.open("output_baseline.txt", "w", "utf-8")
 	#looping over line by line in both files simultaneously
 	for urdu_line, hindi_line in zip(urdu_file, hindi_file):
-		#this is for extracting the line numbers from the start, we can use them to match lines in both files
-		#start_urdu = re.findall('\d+\|\d+\|', urdu_line)
 		start_urdu = ''
 		start_hindi = ''
-		#start_hindi = re.findall('\d+\|\d+\|', hindi_line)
-		#print str(start_urdu)
-		#print str(start_hindi)
-		#if the start numbers in both files match, we can do further processing
-		#if str(start_urdu) == str(start_hindi):
-		
-		#removing the starting line numbers
-		#urdu_line = urdu_line.replace(''.join(start_urdu),'')
+
 		#removing useless characters from line
 		urdu_line = urdu_line.replace('(', ' ').replace(')', ' ').replace('!',' ').replace('.',' ')
-
-		#removing the starting line numbers
-		#hindi_line = hindi_line.replace(''.join(start_hindi),'')
-		#removing useless characters from line
 		hindi_line = hindi_line.replace('(', ' ').replace(')', ' ').replace('!',' ').replace('.',' ')
-
-		#verifying that the correct corresponding sentences were read
-		#print urdu_line
-		#print hindi_line
 
 		#splitting the urdu line based on space
 		urdu_words = urdu_line.split()
-		#print urdu_words
 		urdu_ipa_list = covertUrduWordsinIPA(urdu_words)
-		#print len(urdu_ipa_list)	
 
 		#splitting the hindi line based on space
 		hindi_words = hindi_line.split()
-		#print hindi_words
 		hindi_ipa_list = covertHindiWordsinIPA(hindi_words)
-		#print len(hindi_ipa_list)
 
 		#got the matches indexes in IPA lists, now using them to match actual words 
 		index_dict = matchWordsBasedOnIPA(urdu_ipa_list, hindi_ipa_list)
@@ -392,20 +353,9 @@ def main():
 		for key,value in index_dict.items():
 			if value[1] <= 3:
 				output_file.write(str(start_urdu) +'\t'+urdu_words[key]+ '('+ urdu_ipa_list[key]+')'+'\t'+ hindi_words[value[0]]+'('+ hindi_ipa_list[value[0]]+')'+'\t'+ str(value[1])+'\n')
-					#print urdu_words[key]+'\t'+ hindi_words[value[0]]+'\t'+ str(value[1])
 				
 				word_dict[urdu_words[key]] = [(hindi_words[value[0]], value[1])]
 
-
-				
-		#else:
-		#	print 'Line numbers have misaligned!!! Please check and verify...'
-		
 	output_file.close()
-	#for alphabet,ipa in urdu_ipa_dict.items():
-	#	print alphabet+':'
-	#	for one in ipa:
-	#		print(one)
-	#print unicode(urdu_ipa_dict)
 
 main()
