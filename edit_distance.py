@@ -9,7 +9,7 @@ def updated_list_of_words(line):
     #print  "return updated_word_list",updated_word_list
     return updated_word_list
 
-
+#This funtion takes two strings and returns the edit distance between them.
 def damerau_levenshtein_distance(s1, s2):
     d = {}
     lenstr1 = len(s1)
@@ -36,8 +36,13 @@ def damerau_levenshtein_distance(s1, s2):
     return d[lenstr1 - 1, lenstr2 - 1]
 
 def main():
-    hindi_file_1 = codecs.open('urdu_standardized.txt', encoding='utf-8')
-    hindi_file_2 = codecs.open('output111.txt', encoding='utf-8')
+    #for evaluating hindi transliteration
+    hindi_file_1 = codecs.open('hindi_reference.txt', encoding='utf-8')
+    hindi_file_2 = codecs.open('hindi_output.txt', encoding='utf-8')
+    
+    #for evaluating urdu transliteration
+    #hindi_file_1 = codecs.open('urdu_reference.txt', encoding='utf-8')
+    #hindi_file_2 = codecs.open('urdu_output.txt', encoding='utf-8')
     edit_distance = []
 
     for hindi_line_1,hindi_line_2 in zip(hindi_file_1,hindi_file_2) :
@@ -51,7 +56,9 @@ def main():
             for word1, word2 in zip(hindi_words_1,hindi_words_2):
                 a = damerau_levenshtein_distance(word1, word2)
                 edit_distance.append(a)
-    print "average edit distance for urdu", float(sum(edit_distance))/float(len(edit_distance))
+                
+    #Average edit distance is sum of all the edit distances divided by the total number of words.
+    print "average edit distance for hindi", float(sum(edit_distance))/float(len(edit_distance))
 
 main()
 
