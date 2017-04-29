@@ -2,11 +2,9 @@ import codecs
 import math
 def updated_list_of_words(line):
     word_list=line.split()
-    #print line
     updated_word_list=[]
     for word in word_list:
         updated_word_list.append(word)
-    #print  "return updated_word_list",updated_word_list
     return updated_word_list
 
 #This funtion takes two strings and returns the edit distance between them.
