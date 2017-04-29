@@ -1,0 +1,46 @@
+I assume that you have successfully installed Moses, GIZA++ (for word-aligning your parallel corpus) and 
+SRILM (for language model estimation) and would like to use parallel data (platts) to build a real phrase-based transliteration system. It requires at least 2G of RAM, and about 10G of free disk space (these requirements are just educated guesses).
+
+I assume that you're going to install all the tools and data in your home directory (i.e. ~/), and that you've already downloaded and compiled Moses into ~/mosesdecoder. And you're going to run Moses from there.
+Installing GIZA++: GIZA++ is hosted at Google Code, and can be installed via svn:
+ git clone https://github.com/moses-smt/giza-pp.git
+ cd giza-pp
+ make
+This should create the binaries ~/giza-pp/GIZA++-v2/GIZA++, ~/giza-pp/GIZA++-v2/snt2cooc.out and ~/giza-pp/mkcls-v2/mkcls. These need to be copied to somewhere that Moses can find them as follows
+ cd ~/mosesdecoder
+ mkdir tools
+ cp ~/giza-pp/GIZA++-v2/GIZA++ ~/giza-pp/GIZA++-v2/snt2cooc.out \
+   ~/giza-pp/mkcls-v2/mkcls tools
+For training, the training script needs to know where GIZA++ was installed using the -external-bin-dir argument.
+ train-model.perl -external-bin-dir $HOME/mosesdecoder/tools
+Note - GIZA++ only compiles with gcc. So I am assuming that if you are using OSX, you'll install gcc yourself.
+
+Corpus Preparation
+To train a translation system we need parallel data which is aligned at the sentence level. In case of transliteration, the parallel data is words instead of sentences, so each Hindi – Urdu parallel word pair will be conisdered a parallel sentence pair like classical SMT and each character in the parallel entry will be considered a word. A space needs to be introduced after each character in the Urdu – Hindi parallel lexicon. I am going to use Platts parallel data corpus, extracted from the data of a dictionary of Urdu, classical Hindi and English (Platts 1884), digitized under the project “Digital South Asian Library” at University of Chicago and Center for Research Libraries.
+
+ cd
+ mkdir corpus
+ [put the corpus as platts.urd and platts.hin here - I am not putting it online as it is not available publicly]
+
+Language Model Training
+The language model (LM) is used to ensure fluent output, so it is built with the target language (i.e when doing Urdu to Hindi Transliteration then we would need to develop a model for Hindi). SRILM documentation gives a full explanation of the command-line options, but the following will build an appropriate 3-gram language model.
+ mkdir ~/lm
+ cd ~/lm
+ ~/srilm-1.7.2/bin/i686-m64/ngram-count -text [location of platts.urd] -lm [platts.lm.urd] -order 3
+
+Training the Translation System
+To do this, I run word-alignment (using GIZA++), do phrase extraction and scoring, create lexicalised reordering tables and create your Moses configuration file, all with a single command. I recommend that you create an appropriate directory as follows (like I have), and then run the training command, catching logs:
+ mkdir ~/working
+ cd ~/working
+ nohup nice ~/mosesdecoder/scripts/training/train-model.perl -root-dir train \
+ -corpus ~/corpus/[platts]                             \
+ -f hin -e urd -alignment grow-diag-final-and -reordering msd-bidirectional-fe \
+ -lm 0:3:$HOME/lm/platts.lm.urd:8                          \
+ -external-bin-dir ~/mosesdecoder/tools >& training.out &
+
+Once it's finished there should be a moses.ini file in the directory ~/working/train/model. You can use the model specified by this ini file to decode (i.e. transliterate)
+
+Testing
+You can now run Moses with
+ ~/mosesdecoder/bin/moses -f ~/working/mert-work/moses.ini
+and type in your favourite Hindi sentence to see the results.
